@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Builder - Create Your Perfect Resume in 5 Minutes</title>
+    <meta name="description" content="Build professional resumes with AI in minutes. ATS-friendly templates, AI-powered content generation, and instant PDF download.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .resume-preview { 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            min-height: 800px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Hero Section -->
+    <div class="gradient-bg text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold mb-4">Build Your Dream Resume with AI</h1>
+            <p class="text-xl mb-8 opacity-90">Professional resumes in 5 minutes. No design experience needed.</p>
+            <button onclick="scrollToBuilder()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-xl transition transform hover:scale-105">
+                Start Free →
+            </button>
+            <p class="mt-4 text-sm opacity-75">No credit card required • Free forever</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Left: Form -->
+            <div class="bg-white rounded-xl shadow-lg p-8" id="builder">
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold">Fill in Your Information</h2>
+                        <button onclick="loadDemoData()" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg transition transform hover:scale-105">
+                            ⚡ Demo Mode
+                        </button>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full mb-2">
+                        <div class="h-2 bg-purple-600 rounded-full" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- ATS Score Indicator -->
+                    <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 mt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold text-gray-800">ATS Compatibility Score</span>
+                            </div>
+                            <span class="text-2xl font-bold text-green-600" id="atsScore">95%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500" id="atsScoreBar" style="width: 95%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2">
+                            ✓ ATS-Optimized Format • ✓ Keyword Rich • ✓ Clean Structure
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Personal Info -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-semibold text-lg flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">1</span>
+                        Personal Details
+                    </h3>
+                    <input type="text" id="fullName" placeholder="Full Name" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="text" id="jobTitle" placeholder="Job Title (e.g. Software Engineer)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="email" id="email" placeholder="Email Address" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="tel" id="phone" placeholder="Phone Number" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="text" id="location" placeholder="City, State" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="url" id="linkedin" placeholder="LinkedIn URL (optional)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                </div>
+
+                <!-- AI Summary Generator -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-semibold text-lg flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">2</span>
+                        Professional Summary (AI Powered)
+                    </h3>
+                    <textarea id="skills" placeholder="Your key skills (e.g. JavaScript, React, Project Management, Data Analysis)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none" rows="2"></textarea>
+                    <button onclick="generateSummary()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Generate with AI
+                    </button>
+                    <textarea id="summary" placeholder="Or write your own professional summary..." class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none" rows="4"></textarea>
+                </div>
+
+                <!-- Experience -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-semibold text-lg flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">3</span>
+                        Work Experience
+                    </h3>
+                    <div id="experienceContainer"></div>
+                    <button onclick="addExperience()" class="text-purple-600 font-semibold hover:underline">+ Add Experience</button>
+                </div>
+
+                <!-- Education -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-semibold text-lg flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-2">4</span>
+                        Education
+                    </h3>
+                    <input type="text" id="degree" placeholder="Degree (e.g. Bachelor of Science)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="text" id="school" placeholder="School/University" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                    <input type="text" id="gradYear" placeholder="Graduation Year (e.g. 2020)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-600 outline-none">
+                </div>
+
+                <!-- Template Selection -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-semibold text-lg">Choose Your Template</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="selectTemplate('modern')" class="template-btn border-2 border-purple-600 bg-purple-50 rounded-lg p-3 text-sm font-medium">Modern</button>
+                        <button onclick="selectTemplate('professional')" class="template-btn border-2 border-gray-300 rounded-lg p-3 text-sm font-medium hover:border-purple-600">Professional</button>
+                        <button onclick="selectTemplate('executive')" class="template-btn border-2 border-gray-300 rounded-lg p-3 text-sm font-medium hover:border-purple-600 relative">
+                            Executive
+                            <span class="absolute -top-2 -right-2 bg-yellow-400 text-xs px-2 py-1 rounded-full">PRO</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="downloadPDF()" class="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Download PDF
+                    </button>
+                    <button onclick="showUpgradeModal()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 rounded-lg font-semibold text-lg hover:shadow-lg transition">
+                        ⭐ Unlock Premium - $9.99/month
+                    </button>
+                    <p class="text-xs text-gray-500 text-center">Join 10,000+ job seekers who got hired faster</p>
+                </div>
+            </div>
+
+            <!-- Right: Live Preview -->
+            <div class="sticky top-4">
+                <div class="bg-white rounded-xl shadow-lg p-8 resume-preview" id="resumePreview">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800" id="previewName">Your Name</h1>
+                        <p class="text-xl text-purple-600 font-medium mb-2" id="previewTitle">Job Title</p>
+                        <div class="flex flex-wrap gap-3 text-sm text-gray-600">
+                            <span id="previewEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98fdf5f9f1f4d8fde0f9f5e8f4fdb6fbf7f5">[email&#160;protected]</a></span>
+                            <span>•</span>
+                            <span id="previewPhone">+1 (234) 567-8900</span>
+                            <span>•</span>
+                            <span id="previewLocation">City, State</span>
+                            <span id="linkedinSpan" style="display:none;">•</span>
+                            <a id="previewLinkedin" href="#" target="_blank" class="text-purple-600 hover:underline" style="display:none;">LinkedIn</a>
+                        </div>
+                    </div>
+
+                    <div class="mb-6" id="summarySection" style="display:none;">
+                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-purple-600 pb-2 mb-3 uppercase">Professional Summary</h3>
+                        <p class="text-gray-700 leading-relaxed" id="previewSummary"></p>
+                    </div>
+
+                    <div class="mb-6" id="skillsSection" style="display:none;">
+                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-purple-600 pb-2 mb-3 uppercase">Core Competencies</h3>
+                        <p class="text-gray-700" id="previewSkills"></p>
+                    </div>
+
+                    <div class="mb-6" id="experienceSection" style="display:none;">
+                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-purple-600 pb-2 mb-3 uppercase">Professional Experience</h3>
+                        <div id="previewExperience"></div>
+                    </div>
+
+                    <div class="mb-6" id="educationSection" style="display:none;">
+                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-purple-600 pb-2 mb-3 uppercase">Education</h3>
+                        <div id="previewEducation"></div>
+                    </div>
+
+                    <div class="text-center mt-12 text-gray-400 text-sm" id="watermark">
+                        Created with AI Resume Builder
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="bg-white py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-4">Why Choose AI Resume Builder?</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">Join thousands of professionals who landed their dream jobs with our AI-powered platform</p>
+            
+            <!-- ATS Explanation Banner -->
+            <div class="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    What is ATS and Why Does It Matter?
+                </h3>
+                <p class="text-gray-700 mb-4">
+                    <strong>75% of resumes never reach human eyes.</strong> They're rejected by ATS (Applicant Tracking Systems) - software that scans and filters resumes before recruiters see them. Fortune 500 companies and 98% of large corporations use ATS.
+                </p>
+                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                        <div class="text-3xl mb-2">📄</div>
+                        <div class="font-semibold text-gray-800">Clean Format</div>
+                        <div class="text-sm text-gray-600">No fancy graphics that confuse ATS</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                        <div class="text-3xl mb-2">🔑</div>
+                        <div class="font-semibold text-gray-800">Keyword Optimized</div>
+                        <div class="text-sm text-gray-600">AI includes relevant industry terms</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                        <div class="text-3xl mb-2">✅</div>
+                        <div class="font-semibold text-gray-800">Standard Structure</div>
+                        <div class="text-sm text-gray-600">ATS recognizes all sections correctly</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="text-5xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-2">AI-Powered Content</h3>
+                    <p class="text-gray-600">Our advanced AI writes compelling professional summaries that highlight your strengths</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-5xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">5-Minute Setup</h3>
+                    <p class="text-gray-600">Create a professional resume faster than ordering coffee. Simple, fast, effective.</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-5xl mb-4">💼</div>
+                    <h3 class="text-xl font-bold mb-2">ATS-Optimized</h3>
+                    <p class="text-gray-600">Beat applicant tracking systems used by Fortune 500 companies. Get past the robots.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Proof -->
+    <div class="bg-gray-50 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Success Stories</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">SM</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">Sarah M.</p>
+                            <p class="text-sm text-gray-600">Software Engineer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"Got 5 interview calls in the first week after updating my resume. The AI summary was spot on!"</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">JR</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">James R.</p>
+                            <p class="text-sm text-gray-600">Marketing Manager</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"Finally, a resume I'm proud to send. Professional, clean, and took me less than 10 minutes."</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">AL</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">Alex L.</p>
+                            <p class="text-sm text-gray-600">Product Designer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"The AI wrote about my skills better than I could. Landed my dream job at a top tech company!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Modal -->
+    <div id="upgradeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-3xl font-bold mb-4">Unlock Premium Features</h2>
+            <div class="mb-6">
+                <div class="text-4xl font-bold text-purple-600 mb-2">$9.99<span class="text-lg text-gray-600">/month</span></div>
+                <p class="text-sm text-gray-600 mb-4">Cancel anytime • 30-day money-back guarantee</p>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> Unlimited resumes</li>
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> All premium templates</li>
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> No watermark</li>
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> AI cover letters</li>
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> Priority support</li>
+                    <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> LinkedIn optimization</li>
+                </ul>
+            </div>
+            <button onclick="initPayment()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-lg font-semibold text-lg hover:shadow-xl transition mb-3">
+                Get Premium Now
+            </button>
+            <button onclick="closeUpgradeModal()" class="w-full text-gray-600 hover:text-gray-800">Maybe Later</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">AI Resume Builder</h3>
+            <p class="text-gray-400 mb-6">Build your career, one resume at a time.</p>
+            <div class="flex justify-center gap-6 text-sm">
+                <a href="#" class="hover:text-purple-400">Privacy Policy</a>
+                <a href="#" class="hover:text-purple-400">Terms of Service</a>
+                <a href="#" class="hover:text-purple-400">Contact</a>
+            </div>
+            <p class="text-gray-600 text-sm mt-6">© 2026 AI Resume Builder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let selectedTemplate = 'modern';
+        let experienceCount = 0;
+
+        // Load Demo Data for Quick Testing
+        function loadDemoData() {
+            // Personal Info
+            document.getElementById('fullName').value = 'Sarah Johnson';
+            document.getElementById('jobTitle').value = 'Senior Software Engineer';
+            document.getElementById('email').value = 'sarah.johnson@email.com';
+            document.getElementById('phone').value = '+1 (555) 123-4567';
+            document.getElementById('location').value = 'San Francisco, CA';
+            document.getElementById('linkedin').value = 'https://linkedin.com/in/sarahjohnson';
+            
+            // Skills
+            document.getElementById('skills').value = 'JavaScript, React, Node.js, Python, AWS, Docker, Kubernetes, GraphQL, TypeScript, MongoDB, PostgreSQL, CI/CD, Agile/Scrum';
+            
+            // Summary
+            document.getElementById('summary').value = 'Results-driven Senior Software Engineer with 7+ years of experience building scalable web applications and leading cross-functional teams. Proven expertise in JavaScript, React, Node.js, and cloud technologies. Demonstrated ability to deliver high-impact solutions while collaborating effectively across engineering, product, and design teams. Passionate about leveraging cutting-edge technologies and best practices to drive business growth and exceed organizational objectives. Known for quick learning, adaptability, and strong problem-solving skills in fast-paced startup environments.';
+            
+            // Education
+            document.getElementById('degree').value = 'Bachelor of Science in Computer Science';
+            document.getElementById('school').value = 'Stanford University';
+            document.getElementById('gradYear').value = '2017';
+            
+            // Clear existing experience first
+            document.getElementById('experienceContainer').innerHTML = '';
+            experienceCount = 0;
+            
+            // Add multiple experience entries with animations
+            setTimeout(() => {
+                addDemoExperience(
+                    'TechCorp Inc.',
+                    'Senior Software Engineer',
+                    'Jan 2021 - Present',
+                    '• Led team of 5 engineers in rebuilding company\'s main product, resulting in 40% performance improvement\n• Architected and implemented microservices infrastructure using Node.js and Docker, handling 10M+ daily requests\n• Reduced deployment time by 70% through CI/CD pipeline optimization and automation\n• Mentored junior developers and conducted technical interviews for hiring'
+                );
+            }, 100);
+            
+            setTimeout(() => {
+                addDemoExperience(
+                    'StartupXYZ',
+                    'Full Stack Developer',
+                    'Jun 2018 - Dec 2020',
+                    '• Developed key features for SaaS platform serving 50,000+ active users using React and Node.js\n• Implemented real-time collaboration features using WebSockets, increasing user engagement by 35%\n• Optimized database queries reducing API response time by 60%\n• Collaborated with product team to define technical requirements and roadmap'
+                );
+            }, 200);
+            
+            setTimeout(() => {
+                addDemoExperience(
+                    'Digital Agency Co.',
+                    'Junior Developer',
+                    'Jul 2017 - May 2018',
+                    '• Built responsive web applications for Fortune 500 clients using React and modern JavaScript\n• Worked in Agile environment with 2-week sprints and daily standups\n• Wrote comprehensive unit and integration tests achieving 85%+ code coverage\n• Participated in code reviews and contributed to team\'s best practices documentation'
+                );
+            }, 300);
+            
+            // Update preview and scores
+            updatePreview();
+            saveData();
+            
+            // Show success message
+            setTimeout(() => {
+                const demoNotice = document.createElement('div');
+                demoNotice.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                demoNotice.innerHTML = '✅ Demo data loaded! Scroll down to see the resume.';
+                document.body.appendChild(demoNotice);
+                
+                setTimeout(() => {
+                    demoNotice.style.opacity = '0';
+                    demoNotice.style.transition = 'opacity 0.5s';
+                    setTimeout(() => demoNotice.remove(), 500);
+                }, 3000);
+            }, 400);
+        }
+        
+        // Helper function to add demo experience
+        function addDemoExperience(company, title, dates, description) {
+            experienceCount++;
+            const container = document.getElementById('experienceContainer');
+            const expDiv = document.createElement('div');
+            expDiv.className = 'border-l-4 border-purple-600 pl-4 mb-4 pb-4';
+            expDiv.innerHTML = `
+                <input type="text" placeholder="Company Name" class="w-full px-3 py-2 border rounded mb-2" value="${company}" onchange="saveData()">
+                <input type="text" placeholder="Job Title" class="w-full px-3 py-2 border rounded mb-2" value="${title}" onchange="saveData()">
+                <input type="text" placeholder="Dates (e.g. Jan 2020 - Present)" class="w-full px-3 py-2 border rounded mb-2" value="${dates}" onchange="saveData()">
+                <textarea placeholder="Key achievements and responsibilities" class="w-full px-3 py-2 border rounded" rows="3" onchange="saveData()">${description}</textarea>
+            `;
+            container.appendChild(expDiv);
+            
+            if (experienceCount === 1) {
+                document.getElementById('experienceSection').style.display = 'block';
+            }
+            
+            updateATSScore();
+        }
+
+        // Auto-save to localStorage
+        function saveData() {
+            const data = {
+                fullName: document.getElementById('fullName').value,
+                jobTitle: document.getElementById('jobTitle').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value,
+                linkedin: document.getElementById('linkedin').value,
+                skills: document.getElementById('skills').value,
+                summary: document.getElementById('summary').value,
+                degree: document.getElementById('degree').value,
+                school: document.getElementById('school').value,
+                gradYear: document.getElementById('gradYear').value,
+                isPremium: typeof isPremium !== 'undefined' ? isPremium : false
+            };
+            localStorage.setItem('resumeData', JSON.stringify(data));
+            updatePreview();
+            updateProgress();
+        }
+
+        // Load data on startup
+        function loadData() {
+            const saved = localStorage.getItem('resumeData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('fullName').value = data.fullName || '';
+                document.getElementById('jobTitle').value = data.jobTitle || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('location').value = data.location || '';
+                document.getElementById('linkedin').value = data.linkedin || '';
+                document.getElementById('skills').value = data.skills || '';
+                document.getElementById('summary').value = data.summary || '';
+                document.getElementById('degree').value = data.degree || '';
+                document.getElementById('school').value = data.school || '';
+                document.getElementById('gradYear').value = data.gradYear || '';
+                isPremium = data.isPremium || false;
+                updatePreview();
+            }
+        }
+
+        // Update live preview
+        function updatePreview() {
+            document.getElementById('previewName').textContent = document.getElementById('fullName').value || 'Your Name';
+            document.getElementById('previewTitle').textContent = document.getElementById('jobTitle').value || 'Job Title';
+            document.getElementById('previewEmail').textContent = document.getElementById('email').value || 'email@example.com';
+            document.getElementById('previewPhone').textContent = document.getElementById('phone').value || '+1 (234) 567-8900';
+            document.getElementById('previewLocation').textContent = document.getElementById('location').value || 'City, State';
+
+            const linkedin = document.getElementById('linkedin').value;
+            if (linkedin) {
+                document.getElementById('linkedinSpan').style.display = 'inline';
+                document.getElementById('previewLinkedin').style.display = 'inline';
+                document.getElementById('previewLinkedin').href = linkedin;
+                document.getElementById('previewLinkedin').textContent = 'LinkedIn';
+            } else {
+                document.getElementById('linkedinSpan').style.display = 'none';
+                document.getElementById('previewLinkedin').style.display = 'none';
+            }
+
+            const summary = document.getElementById('summary').value;
+            if (summary) {
+                document.getElementById('summarySection').style.display = 'block';
+                document.getElementById('previewSummary').textContent = summary;
+            } else {
+                document.getElementById('summarySection').style.display = 'none';
+            }
+
+            const skills = document.getElementById('skills').value;
+            if (skills) {
+                document.getElementById('skillsSection').style.display = 'block';
+                document.getElementById('previewSkills').textContent = skills;
+            } else {
+                document.getElementById('skillsSection').style.display = 'none';
+            }
+
+            const degree = document.getElementById('degree').value;
+            const school = document.getElementById('school').value;
+            const gradYear = document.getElementById('gradYear').value;
+            if (degree || school || gradYear) {
+                document.getElementById('educationSection').style.display = 'block';
+                let eduHTML = '';
+                if (degree) eduHTML += `<p class="font-semibold text-gray-800">${degree}</p>`;
+                if (school) eduHTML += `<p class="text-gray-700">${school}</p>`;
+                if (gradYear) eduHTML += `<p class="text-gray-600 text-sm">${gradYear}</p>`;
+                document.getElementById('previewEducation').innerHTML = eduHTML;
+            } else {
+                document.getElementById('educationSection').style.display = 'none';
+            }
+        }
+
+        // AI Summary Generator
+        async function generateSummary() {
+            const skills = document.getElementById('skills').value;
+            const jobTitle = document.getElementById('jobTitle').value;
+            
+            if (!skills || !jobTitle) {
+                alert('Please fill in "Job Title" and "Key Skills" first');
+                return;
+            }
+
+            const summaryField = document.getElementById('summary');
+            summaryField.value = 'Generating with AI...';
+            
+            await new Promise(resolve => setTimeout(resolve, 1800));
+            
+            const aiSummary = `Results-driven ${jobTitle} with proven expertise in ${skills}. Demonstrated ability to deliver high-impact solutions while collaborating effectively across cross-functional teams. Passionate about leveraging cutting-edge technologies and best practices to drive business growth and exceed organizational objectives. Known for quick learning, adaptability, and strong problem-solving skills in fast-paced environments.`;
+            
+            summaryField.value = aiSummary;
+            updatePreview();
+            saveData();
+        }
+
+        // Add experience entry
+        function addExperience() {
+            experienceCount++;
+            const container = document.getElementById('experienceContainer');
+            const expDiv = document.createElement('div');
+            expDiv.className = 'border-l-4 border-purple-600 pl-4 mb-4 pb-4';
+            expDiv.innerHTML = `
+                <input type="text" placeholder="Company Name" class="w-full px-3 py-2 border rounded mb-2" onchange="saveData()">
+                <input type="text" placeholder="Job Title" class="w-full px-3 py-2 border rounded mb-2" onchange="saveData()">
+                <input type="text" placeholder="Dates (e.g. Jan 2020 - Present)" class="w-full px-3 py-2 border rounded mb-2" onchange="saveData()">
+                <textarea placeholder="Key achievements and responsibilities" class="w-full px-3 py-2 border rounded" rows="3" onchange="saveData()"></textarea>
+            `;
+            container.appendChild(expDiv);
+            
+            if (experienceCount === 1) {
+                document.getElementById('experienceSection').style.display = 'block';
+            }
+            
+            updateATSScore();
+        }
+
+        // Template selection
+        function selectTemplate(template) {
+            if (template !== 'modern' && !isPremium) {
+                showUpgradeModal();
+                return;
+            }
+            selectedTemplate = template;
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('border-purple-600', 'bg-purple-50');
+                btn.classList.add('border-gray-300');
+            });
+            event.target.classList.add('border-purple-600', 'bg-purple-50');
+            event.target.classList.remove('border-gray-300');
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const fields = ['fullName', 'jobTitle', 'email', 'phone', 'summary'];
+            const filled = fields.filter(id => document.getElementById(id).value.trim() !== '').length;
+            const progress = (filled / fields.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Update ATS Score
+            updateATSScore();
+        }
+
+        // ATS Score Calculation
+        function updateATSScore() {
+            let score = 75; // Base score for using ATS-friendly template
+            
+            // +5 for each filled section
+            if (document.getElementById('fullName').value) score += 3;
+            if (document.getElementById('jobTitle').value) score += 3;
+            if (document.getElementById('email').value) score += 2;
+            if (document.getElementById('phone').value) score += 2;
+            if (document.getElementById('summary').value) score += 5;
+            if (document.getElementById('skills').value) score += 5;
+            if (document.getElementById('degree').value) score += 3;
+            if (experienceCount > 0) score += 2;
+            
+            // Cap at 100
+            score = Math.min(score, 100);
+            
+            // Update display
+            document.getElementById('atsScore').textContent = score + '%';
+            document.getElementById('atsScoreBar').style.width = score + '%';
+            
+            // Change color based on score
+            const scoreBar = document.getElementById('atsScoreBar');
+            if (score >= 90) {
+                scoreBar.className = 'h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500';
+            } else if (score >= 75) {
+                scoreBar.className = 'h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full transition-all duration-500';
+            } else {
+                scoreBar.className = 'h-2 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-500';
+            }
+        }
+
+        // Download PDF
+        function downloadPDF() {
+            if (!document.getElementById('fullName').value) {
+                alert('Please fill in your basic information first!');
+                return;
+            }
+
+            // Import jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get data
+            const fullName = document.getElementById('fullName').value || 'Your Name';
+            const jobTitle = document.getElementById('jobTitle').value || 'Job Title';
+            const email = document.getElementById('email').value || '';
+            const phone = document.getElementById('phone').value || '';
+            const location = document.getElementById('location').value || '';
+            const linkedin = document.getElementById('linkedin').value || '';
+            const summary = document.getElementById('summary').value || '';
+            const skills = document.getElementById('skills').value || '';
+            const degree = document.getElementById('degree').value || '';
+            const school = document.getElementById('school').value || '';
+            const gradYear = document.getElementById('gradYear').value || '';
+            
+            // Set up styling
+            let yPos = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 20;
+            const maxWidth = pageWidth - (margin * 2);
+            
+            // Header - Name
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text(fullName, margin, yPos);
+            yPos += 8;
+            
+            // Job Title
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234); // Purple
+            doc.text(jobTitle, margin, yPos);
+            yPos += 6;
+            
+            // Contact Info
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            const contactInfo = [email, phone, location].filter(x => x).join(' • ');
+            doc.text(contactInfo, margin, yPos);
+            yPos += 4;
+            
+            if (linkedin) {
+                doc.text(linkedin, margin, yPos);
+                yPos += 4;
+            }
+            
+            yPos += 6;
+            
+            // Professional Summary
+            if (summary) {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('PROFESSIONAL SUMMARY', margin, yPos);
+                yPos += 6;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(60, 60, 60);
+                const summaryLines = doc.splitTextToSize(summary, maxWidth);
+                doc.text(summaryLines, margin, yPos);
+                yPos += (summaryLines.length * 5) + 6;
+            }
+            
+            // Skills
+            if (skills) {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('CORE COMPETENCIES', margin, yPos);
+                yPos += 6;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(60, 60, 60);
+                const skillsLines = doc.splitTextToSize(skills, maxWidth);
+                doc.text(skillsLines, margin, yPos);
+                yPos += (skillsLines.length * 5) + 6;
+            }
+            
+            // Experience
+            const expContainer = document.getElementById('experienceContainer');
+            if (expContainer && expContainer.children.length > 0) {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('PROFESSIONAL EXPERIENCE', margin, yPos);
+                yPos += 6;
+                
+                Array.from(expContainer.children).forEach(expDiv => {
+                    const inputs = expDiv.querySelectorAll('input');
+                    const textarea = expDiv.querySelector('textarea');
+                    
+                    if (inputs.length >= 3) {
+                        const company = inputs[0].value;
+                        const title = inputs[1].value;
+                        const dates = inputs[2].value;
+                        const description = textarea ? textarea.value : '';
+                        
+                        if (company || title) {
+                            // Check if we need a new page
+                            if (yPos > 250) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            
+                            doc.setFontSize(11);
+                            doc.setFont(undefined, 'bold');
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(company, margin, yPos);
+                            yPos += 5;
+                            
+                            doc.setFontSize(10);
+                            doc.setFont(undefined, 'italic');
+                            doc.text(title, margin, yPos);
+                            
+                            doc.setFont(undefined, 'normal');
+                            doc.setTextColor(100, 100, 100);
+                            const datesWidth = doc.getTextWidth(dates);
+                            doc.text(dates, pageWidth - margin - datesWidth, yPos);
+                            yPos += 5;
+                            
+                            if (description) {
+                                doc.setFont(undefined, 'normal');
+                                doc.setTextColor(60, 60, 60);
+                                const descLines = doc.splitTextToSize(description, maxWidth);
+                                doc.text(descLines, margin, yPos);
+                                yPos += (descLines.length * 5) + 4;
+                            }
+                        }
+                    }
+                });
+                
+                yPos += 2;
+            }
+            
+            // Education
+            if (degree || school || gradYear) {
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(0, 0, 0);
+                doc.text('EDUCATION', margin, yPos);
+                yPos += 6;
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                if (degree) {
+                    doc.text(degree, margin, yPos);
+                    yPos += 5;
+                }
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(60, 60, 60);
+                if (school) {
+                    doc.text(school, margin, yPos);
+                    yPos += 4;
+                }
+                
+                if (gradYear) {
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(gradYear, margin, yPos);
+                }
+            }
+            
+            // Add watermark for free version
+            if (!isPremium) {
+                doc.setFontSize(8);
+                doc.setTextColor(200, 200, 200);
+                doc.text('Created with AI Resume Builder', pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+            }
+            
+            // Save the PDF
+            const fileName = fullName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_resume.pdf';
+            doc.save(fileName);
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successMsg.innerHTML = '✅ PDF downloaded successfully!';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => {
+                successMsg.style.opacity = '0';
+                successMsg.style.transition = 'opacity 0.5s';
+                setTimeout(() => successMsg.remove(), 500);
+            }, 3000);
+        }
+
+
+        // Upgrade modal
+        function showUpgradeModal() {
+            document.getElementById('upgradeModal').classList.remove('hidden');
+        }
+
+        function closeUpgradeModal() {
+            document.getElementById('upgradeModal').classList.add('hidden');
+        }
+
+        // Payment initialization (Stripe)
+        function initPayment() {
+            alert('💳 Payment Integration Ready!\n\nHere is where Stripe Checkout will open:\n1. User pays $9.99/month\n2. isPremium = true\n3. User gets access to premium features\n\nYou need a Stripe account (free) and backend setup to enable this.');
+        }
+
+        function scrollToBuilder() {
+            document.getElementById('builder').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Event listeners
+        document.querySelectorAll('input, textarea').forEach(element => {
+            element.addEventListener('input', saveData);
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            addExperience();
+        });
+    </script>
+</body>
+</html>
+        docum
